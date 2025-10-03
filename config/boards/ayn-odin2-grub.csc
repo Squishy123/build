@@ -76,11 +76,8 @@ function post_family_tweaks__ayn-odin2_enable_services() {
 		do_with_retries 3 chroot_sdcard_apt_get_update
 
 		display_alert "Adding Mesa Vulkan Drivers"
-		do_with_retries 3 chroot_sdcard_apt_get_install mesa-vulkan-drivers vulkan-tools
+		do_with_retries 3 chroot_sdcard_apt_get_install mesa-vulkan-drivers vulkan-utils
 	fi
-
-	display_alert "Installing Pi-Apps"
-	do_with_retries 3 chroot_sdcard wget -qO- https://raw.githubusercontent.com/Botspot/pi-apps/master/install | bash
 
 	# We need unudhcpd from armbian repo, so enable it
 	mv "${SDCARD}"/etc/apt/sources.list.d/armbian.sources.disabled "${SDCARD}"/etc/apt/sources.list.d/armbian.sources
