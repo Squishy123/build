@@ -72,6 +72,15 @@ function post_family_tweaks__ayn-odin2_enable_services() {
 	if [[ "${RELEASE}" == "jammy" ]] || [[ "${RELEASE}" == "noble" ]]; then
 		display_alert "Adding Mesa PPA For Ubuntu ${BOARD}" "warn"
 		do_with_retries 3 chroot_sdcard add-apt-repository ppa:kisak/kisak-mesa --yes
+
+		display_alert "Adding Mesa drivers" "warn"
+		do_with_retries 3 chroot_sdcard_apt_get_update
+		do_with_retries 3 chroot_sdcard_apt_get_install libgl1-mesa-dri mesa-vulkan-drivers 
+
+		if [[ "${DESKTOP_ENVIRONMENT}" =~ ^(kde)$ ]]; then 
+			display alert "Adding in kubuntu desktop" "warn" 
+			do_with_retries 3 chroot_sdcard_apt_get_install kubuntu-desktop 
+		fi
 	fi
 
 	# We need unudhcpd from armbian repo, so enable it
