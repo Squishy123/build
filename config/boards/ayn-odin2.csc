@@ -64,14 +64,24 @@ function post_family_tweaks__ayn-odin2_enable_services() {
 		return 0
 	fi
 
-	if [[ "${RELEASE}" == "jammy" ]] || [[ "${RELEASE}" == "noble" ]]; then
+	if [[ "${RELEASE}" == "jammy" ]] || [[ "${RELEASE}" == "noble" ]] || [[ "${RELEASE}" == "plucky" ]]; then
 		display_alert "Adding Mesa PPA For Ubuntu ${BOARD}" "warn"
 		do_with_retries 3 chroot_sdcard add-apt-repository ppa:kisak/kisak-mesa --yes
 
 		do_with_retries 3 chroot_sdcard_apt_get_update
 		display_alert "Installing Mesa Vulkan Drivers"
 		do_with_retries 3 chroot_sdcard_apt_get_install libgl1-mesa-dri mesa-vulkan-drivers vulkan-tools
+	fi
 
+	if [[ "${RELEASE}" == "trixie" ]]; then
+		do_with_retries 3 chroot_sdcard_apt_get_update
+		display_alert "Installing Mesa Vulkan Drivers"
+		do_with_retries 3 chroot_sdcard_apt_get_install libgl1-mesa-dri mesa-vulkan-drivers vulkan-tools
+	fi
+
+	if [[ "${DESKTOP_ENVIRONMENT}" == "kde-plasma-mobile" ]]; then
+		display_alert "Installing and configuring controller support"
+		do_with_retries 3 chroot_sdcard_apt_get_install antimicro
 	fi
 
 	# We need unudhcpd from armbian repo, so enable it
