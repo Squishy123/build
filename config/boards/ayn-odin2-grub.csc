@@ -88,7 +88,7 @@ function post_family_tweaks__ayn-odin2_enable_services() {
 	if [[ "${DESKTOP_ENVIRONMENT}" == "kde-plasma-mobile" ]]; then
 		display_alert "Installing and configuring controller support"
 		do_with_retries 3 chroot_sdcard_apt_get_install antimicro
-	tfi
+	fi
 
 
 	# We need unudhcpd from armbian repo, so enable it
