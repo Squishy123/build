@@ -5,6 +5,10 @@
 # Disable Pulseaudio timer scheduling which does not work with sndhdmi driver
 if [ -f /etc/pulse/default.pa ]; then sed "s/load-module module-udev-detect$/& tsched=0/g" -i  /etc/pulse/default.pa; fi
 
+# enable pulse audio
+systemctl --user enable pulseaudio
+systemctl --user restart pulseaudio
+
 # Create setup to rotate internal screen and touchscreen @TODO MOVE TO DEVICE SPECIFIC e.g. odin2-grub
 sudo mkdir -p /usr/share/sddm/scripts
 sudo cat <<- EOF > /usr/share/sddm/scripts/Xsetup

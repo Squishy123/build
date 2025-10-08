@@ -10,3 +10,10 @@ maliit-framework
 maliit-keyboard
 xinput
 sddm-theme-breeze
+pulseaudio
+gstreamer1.0-pulseaudio
+pamix
+pasystray
+pavucontrol
+pavucontrol-qt
+pulseaudio-module-bluetooth
