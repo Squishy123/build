@@ -6,7 +6,7 @@
 if [ -f /etc/pulse/default.pa ]; then sed "s/load-module module-udev-detect$/& tsched=0/g" -i  /etc/pulse/default.pa; fi
 
 # enable pulse audio
-systemctl preset pulseaudio.service
+systemctl --global enable pulseaudio.service
 
 #configure sddm
 mkdir -p /etc/sddm.conf.d

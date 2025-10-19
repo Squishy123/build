@@ -88,8 +88,11 @@ function post_family_tweaks__ayn-odin2_enable_services() {
 
 	# Add Gamepad udev rule
 	echo 'SUBSYSTEM=="input", ATTRS{name}=="AYN Odin2 Gamepad", MODE="0666", ENV{ID_INPUT_JOYSTICK}="1"' > "${SDCARD}"/etc/udev/rules.d/99-ignore-gamepad.rules
-	# Not Any driver support suspend mode
-	chroot_sdcard systemctl mask suspend.target
+	# Not Any driver support suspend mode @TODO figure this out
+	# chroot_sdcard systemctl mask suspend.target
+
+	# Change sleep to s2idle
+	chroot_sdcard echo s2idle | tee /sys/power/mem_sleep
 
 	chroot_sdcard systemctl enable usbgadget-rndis.service
 	cp $SRC/packages/bsp/ayn-odin2/LinuxLoader.cfg "${SDCARD}"/boot/
