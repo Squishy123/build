@@ -96,7 +96,7 @@ function post_family_tweaks__ayn-odin2portal_enable_services() {
 	# chroot_sdcard systemctl mask suspend.target
 
 	# Change sleep to s2idle
-	chroot_sdcard echo s2idle | sudo tee /sys/power/mem_sleep
+	chroot_sdcard echo s2idle | tee /sys/power/mem_sleep
 
 	chroot_sdcard systemctl enable qbootctl.service
 	chroot_sdcard systemctl enable usbgadget-rndis.service
