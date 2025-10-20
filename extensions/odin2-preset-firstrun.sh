@@ -52,6 +52,11 @@ function post_family_tweaks__preset_configs() {
 
 
 	# clone starter scripts
-	mkdir -p "${SDCARD}"/home/odin2/sys
-	git clone https://github.com/Squishy123/odin2-scripts.git "${SDCARD}"/home/odin2/sys/odin2-scripts
+}
+
+function pre_customize_image__add_odin2_scripts() {
+	display_alert "Adding Odin2 Scripts" "${EXTENSION}" "info"
+
+	chroot_sdcard mkdir -p /home/odin2/sys
+	chroot_sdcard git clone https://github.com/Squishy123/odin2-scripts.git /home/odin2/sys/odin2-scripts
 }
