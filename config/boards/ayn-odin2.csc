@@ -22,6 +22,7 @@ function ayn-odin2_is_userspace_supported() {
 	return 1
 }
 
+/*
 function pre_customize_image__ayn-odin2_alsa_ucm_conf() {
 	if ! ayn-odin2_is_userspace_supported; then
 		return 0
@@ -36,8 +37,9 @@ function pre_customize_image__ayn-odin2_alsa_ucm_conf() {
 		cp -rf "${unzip_dir}/"* .
 		rm -rf "$unzip_dir" temp.zip
 	)
-}
+}*/
 
+/*
 function post_family_tweaks_bsp__ayn-odin2_firmware() {
 	display_alert "Install firmwares for ${BOARD}" "${RELEASE}" "warn"
 
@@ -54,7 +56,7 @@ function post_family_tweaks_bsp__ayn-odin2_firmware() {
 	install -Dm655 $SRC/packages/bsp/usb-gadget-network/kill-dropbear $destination/etc/initramfs-tools/scripts/init-bottom/
 
 	return 0
-}
+}*/
 
 function post_family_tweaks__ayn-odin2_enable_services() {
 	if ! ayn-odin2_is_userspace_supported; then
@@ -100,6 +102,7 @@ function post_family_tweaks__ayn-odin2_enable_services() {
 	return 0
 }
 
+/*
 function post_family_tweaks_bsp__ayn-odin2_bsp_firmware_in_initrd() {
 	display_alert "Adding to bsp-cli" "${BOARD}: firmware in initrd" "warn"
 	declare file_added_to_bsp_destination # Will be filled in by add_file_from_stdin_to_bsp_destination
@@ -136,4 +139,4 @@ function pre_umount_final_image__update_ABL_settings() {
 	initrd_name=$(find "${SDCARD}/boot/" -type f -name "config-*" | sed 's/.*config-//')
 	sed -i "s/UUID_PLACEHOLDER/${rootfs_image_uuid}/g" "${MOUNT}"/boot/LinuxLoader.cfg
 	sed -i "s/INITRD_PLACEHOLDER/${initrd_name}/g" "${MOUNT}"/boot/LinuxLoader.cfg
-}
+}*/
