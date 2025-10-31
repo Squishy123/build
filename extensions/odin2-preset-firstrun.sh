@@ -49,14 +49,11 @@ function post_family_tweaks__preset_configs() {
 
 	# Preset user default realname
 	echo "PRESET_DEFAULT_REALNAME=Odin2" >> "${SDCARD}"/root/.not_logged_in_yet
-
-
-	# clone starter scripts
 }
 
 function pre_customize_image__add_odin2_scripts() {
 	display_alert "Adding Odin2 Scripts" "${EXTENSION}" "info"
 
-	chroot_sdcard mkdir -p /home/odin2/sys
-	chroot_sdcard git clone https://github.com/Squishy123/odin2-scripts.git /home/odin2/sys/odin2-scripts
+	chroot_sdcard mkdir -p /usr/odin2-scripts
+	chroot_sdcard git clone https://github.com/Squishy123/odin2-scripts.git /usr/odin2-scripts
 }
