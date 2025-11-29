@@ -69,7 +69,7 @@ function install_distribution_specific() {
 # create_sources_list_and_deploy_repo_key <when> <release> <basedir>
 #
 # <when>: rootfs|image
-# <release>: bullseye|bookworm|sid|focal|jammy|noble|oracular|plucky
+# <release>: bullseye|bookworm|sid|focal|jammy|noble|oracular|plucky|quokka
 # <basedir>: path to root directory
 #
 function create_sources_list_and_deploy_repo_key() {
@@ -151,7 +151,7 @@ function create_sources_list_and_deploy_repo_key() {
 			fi
 			;;
 
-		focal | jammy | noble | oracular | plucky)
+		focal | jammy | noble | oracular | plucky | quokka)
 			distro="ubuntu"
 
 			cat <<- EOF > "${basedir}/etc/apt/sources.list.d/${distro}.sources"
