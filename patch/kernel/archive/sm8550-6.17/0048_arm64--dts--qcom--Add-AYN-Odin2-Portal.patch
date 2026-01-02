@@ -1,20 +1,23 @@
-From e7bfacb6894dbd2edfa9dc4758f1cf45ce0b3231 Mon Sep 17 00:00:00 2001
+From 71da45ca956e32d17f59cf69af459fdcbf706512 Mon Sep 17 00:00:00 2001
 From: Teguh Sobirin <teguh@sobir.in>
-Date: Mon, 27 Oct 2025 17:37:46 +0800
-Subject: [PATCH] arm64: dts: qcom: Add AYN QCS8550 Common
+Date: Mon, 24 Feb 2025 16:19:13 +0800
+Subject: [PATCH] arm64: dts: qcom: Add AYN Odin2 Portal
 
 Signed-off-by: Teguh Sobirin <teguh@sobir.in>
 ---
- .../boot/dts/qcom/qcs8550-ayn-common.dtsi     | 1445 +++++++++++++++++
- 1 file changed, 1445 insertions(+)
+ arch/arm64/boot/dts/qcom/Makefile             |    1 +
+ .../boot/dts/qcom/qcs8550-ayn-common.dtsi     | 1262 +++++++++++++++++
+ .../boot/dts/qcom/qcs8550-ayn-odin2portal.dts |  243 ++++
+ 3 files changed, 1488 insertions(+)
  create mode 100644 arch/arm64/boot/dts/qcom/qcs8550-ayn-common.dtsi
+ create mode 100644 arch/arm64/boot/dts/qcom/qcs8550-ayn-odin2portal.dts
 
 diff --git a/arch/arm64/boot/dts/qcom/qcs8550-ayn-common.dtsi b/arch/arm64/boot/dts/qcom/qcs8550-ayn-common.dtsi
 new file mode 100644
-index 000000000000..0954c1854a05
+index 000000000000..58d9ab342fe9
 --- /dev/null
 +++ b/arch/arm64/boot/dts/qcom/qcs8550-ayn-common.dtsi
-@@ -0,0 +1,1698 @@
+@@ -0,0 +1,1262 @@
 +// SPDX-License-Identifier: BSD-3-Clause
 +/*
 + * Copyright (c) 2025, Teguh Sobirin.
@@ -30,18 +33,22 @@ index 000000000000..0954c1854a05
 +#include "pm8550vs.dtsi"
 +#include "pmk8550.dtsi"
 +
-+/delete-node/ &aop_image_mem;
 +/delete-node/ &aop_config_mem;
++/delete-node/ &camera_mem;
 +/delete-node/ &ipa_fw_mem;
 +/delete-node/ &ipa_gsi_mem;
 +/delete-node/ &mpss_dsm_mem;
 +/delete-node/ &mpss_mem;
 +/delete-node/ &q6_mpss_dtb_mem;
++
++/delete-node/ &cci0;
++/delete-node/ &cci1;
++/delete-node/ &cci2;
++/delete-node/ &camcc;
 +/delete-node/ &remoteproc_mpss;
 +
 +/ {
 +	chassis-type = "handset";
-+	rocknix-u-boot-dt-id = "u-boot-odin2";
 +
 +	aliases {
 +		serial0 = &uart7;
@@ -116,17 +123,10 @@ index 000000000000..0954c1854a05
 +		compatible = "pwm-fan";
 +
 +		fan-supply = <&vdd_fan_5v0>;
-+		pwms = <&pm8550_pwm 3 40000>;
++		pwms = <&pm8550_pwm 3 100000>;
 +
 +		pinctrl-names = "default";
-+		pinctrl-0 = <&fan_pwm_active>, <&fan_int>;
-+
-+		pulses-per-revolution = <4>;
-+		interrupt-parent = <&tlmm>;
-+		interrupts = <13 IRQ_TYPE_EDGE_FALLING>;
-+
-+		cooling-levels = <0 40 65 75 90 120 150 200>;
-+		#cooling-cells = <2>;
++		pinctrl-0 = <&fan_pwm_active>;
 +	};
 +
 +	reserved-memory {
@@ -208,223 +208,6 @@ index 000000000000..0954c1854a05
 +		hyp_ext_tags_mem: hyp-ext-tags-region@fce00000 {
 +			reg = <0 0xfce00000 0 0x2900000>;
 +			no-map;
-+		};
-+	};
-+
-+	thermal-zones {
-+		cpuss0-thermal {
-+			polling-delay = <200>;
-+			trips {
-+				cpuss0_fan0: trip-point2 { temperature = <50000>; hysteresis = <3000>; type = "active"; };
-+				cpuss0_fan1: trip-point3 { temperature = <55000>; hysteresis = <3000>; type = "active"; };
-+				cpuss0_fan2: trip-point4 { temperature = <60000>; hysteresis = <3000>; type = "active"; };
-+				cpuss0_fan3: trip-point5 { temperature = <65000>; hysteresis = <3000>; type = "active"; };
-+				cpuss0_fan4: trip-point6 { temperature = <70000>; hysteresis = <3000>; type = "active"; };
-+				cpuss0_fan5: trip-point7 { temperature = <75000>; hysteresis = <3000>; type = "active"; };
-+				cpuss0_fan6: trip-point8 { temperature = <80000>; hysteresis = <3000>; type = "active"; };
-+			};
-+
-+			cooling-maps {
-+				map0 { trip = <&cpuss0_fan0>; cooling-device = <&pwm_fan 0 1>; };
-+				map1 { trip = <&cpuss0_fan1>; cooling-device = <&pwm_fan 1 2>; };
-+				map2 { trip = <&cpuss0_fan2>; cooling-device = <&pwm_fan 2 3>; };
-+				map3 { trip = <&cpuss0_fan3>; cooling-device = <&pwm_fan 3 4>; };
-+				map4 { trip = <&cpuss0_fan4>; cooling-device = <&pwm_fan 4 5>; };
-+				map5 { trip = <&cpuss0_fan5>; cooling-device = <&pwm_fan 5 6>; };
-+				map6 { trip = <&cpuss0_fan6>; cooling-device = <&pwm_fan 6 7>; };
-+			};
-+		};
-+		cpuss1-thermal {
-+			polling-delay = <200>;
-+			trips {
-+				cpuss1_fan0: trip-point2 { temperature = <50000>; hysteresis = <3000>; type = "active"; };
-+				cpuss1_fan1: trip-point3 { temperature = <55000>; hysteresis = <3000>; type = "active"; };
-+				cpuss1_fan2: trip-point4 { temperature = <60000>; hysteresis = <3000>; type = "active"; };
-+				cpuss1_fan3: trip-point5 { temperature = <65000>; hysteresis = <3000>; type = "active"; };
-+				cpuss1_fan4: trip-point6 { temperature = <70000>; hysteresis = <3000>; type = "active"; };
-+				cpuss1_fan5: trip-point7 { temperature = <75000>; hysteresis = <3000>; type = "active"; };
-+				cpuss1_fan6: trip-point8 { temperature = <80000>; hysteresis = <3000>; type = "active"; };
-+			};
-+
-+			cooling-maps {
-+				map0 { trip = <&cpuss1_fan0>; cooling-device = <&pwm_fan 0 1>; };
-+				map1 { trip = <&cpuss1_fan1>; cooling-device = <&pwm_fan 1 2>; };
-+				map2 { trip = <&cpuss1_fan2>; cooling-device = <&pwm_fan 2 3>; };
-+				map3 { trip = <&cpuss1_fan3>; cooling-device = <&pwm_fan 3 4>; };
-+				map4 { trip = <&cpuss1_fan4>; cooling-device = <&pwm_fan 4 5>; };
-+				map5 { trip = <&cpuss1_fan5>; cooling-device = <&pwm_fan 5 6>; };
-+				map6 { trip = <&cpuss1_fan6>; cooling-device = <&pwm_fan 6 7>; };
-+			};
-+		};
-+		cpuss2-thermal {
-+			polling-delay = <200>;
-+			trips {
-+				cpuss2_fan0: trip-point2 { temperature = <50000>; hysteresis = <3000>; type = "active"; };
-+				cpuss2_fan1: trip-point3 { temperature = <55000>; hysteresis = <3000>; type = "active"; };
-+				cpuss2_fan2: trip-point4 { temperature = <60000>; hysteresis = <3000>; type = "active"; };
-+				cpuss2_fan3: trip-point5 { temperature = <65000>; hysteresis = <3000>; type = "active"; };
-+				cpuss2_fan4: trip-point6 { temperature = <70000>; hysteresis = <3000>; type = "active"; };
-+				cpuss2_fan5: trip-point7 { temperature = <75000>; hysteresis = <3000>; type = "active"; };
-+				cpuss2_fan6: trip-point8 { temperature = <80000>; hysteresis = <3000>; type = "active"; };
-+			};
-+
-+			cooling-maps {
-+				map0 { trip = <&cpuss2_fan0>; cooling-device = <&pwm_fan 0 1>; };
-+				map1 { trip = <&cpuss2_fan1>; cooling-device = <&pwm_fan 1 2>; };
-+				map2 { trip = <&cpuss2_fan2>; cooling-device = <&pwm_fan 2 3>; };
-+				map3 { trip = <&cpuss2_fan3>; cooling-device = <&pwm_fan 3 4>; };
-+				map4 { trip = <&cpuss2_fan4>; cooling-device = <&pwm_fan 4 5>; };
-+				map5 { trip = <&cpuss2_fan5>; cooling-device = <&pwm_fan 5 6>; };
-+				map6 { trip = <&cpuss2_fan6>; cooling-device = <&pwm_fan 6 7>; };
-+			};
-+		};
-+		cpuss3-thermal {
-+			polling-delay = <200>;
-+			trips {
-+				cpuss3_fan0: trip-point2 { temperature = <50000>; hysteresis = <3000>; type = "active"; };
-+				cpuss3_fan1: trip-point3 { temperature = <55000>; hysteresis = <3000>; type = "active"; };
-+				cpuss3_fan2: trip-point4 { temperature = <60000>; hysteresis = <3000>; type = "active"; };
-+				cpuss3_fan3: trip-point5 { temperature = <65000>; hysteresis = <3000>; type = "active"; };
-+				cpuss3_fan4: trip-point6 { temperature = <70000>; hysteresis = <3000>; type = "active"; };
-+				cpuss3_fan5: trip-point7 { temperature = <75000>; hysteresis = <3000>; type = "active"; };
-+				cpuss3_fan6: trip-point8 { temperature = <80000>; hysteresis = <3000>; type = "active"; };
-+			};
-+
-+			cooling-maps {
-+				map0 { trip = <&cpuss3_fan0>; cooling-device = <&pwm_fan 0 1>; };
-+				map1 { trip = <&cpuss3_fan1>; cooling-device = <&pwm_fan 1 2>; };
-+				map2 { trip = <&cpuss3_fan2>; cooling-device = <&pwm_fan 2 3>; };
-+				map3 { trip = <&cpuss3_fan3>; cooling-device = <&pwm_fan 3 4>; };
-+				map4 { trip = <&cpuss3_fan4>; cooling-device = <&pwm_fan 4 5>; };
-+				map5 { trip = <&cpuss3_fan5>; cooling-device = <&pwm_fan 5 6>; };
-+				map6 { trip = <&cpuss3_fan6>; cooling-device = <&pwm_fan 6 7>; };
-+			};
-+		};
-+		cpu7-top-thermal {
-+			polling-delay = <200>;
-+			trips {
-+				cpu7_top_fan0: trip-point2 { temperature = <70000>; hysteresis = <3000>; type = "active"; };
-+				cpu7_top_fan1: trip-point3 { temperature = <75000>; hysteresis = <3000>; type = "active"; };
-+				cpu7_top_fan2: trip-point4 { temperature = <80000>; hysteresis = <3000>; type = "active"; };
-+			};
-+
-+			cooling-maps {
-+				map0 { trip = <&cpu7_top_fan0>; cooling-device = <&pwm_fan 4 5>; };
-+				map1 { trip = <&cpu7_top_fan1>; cooling-device = <&pwm_fan 5 6>; };
-+				map2 { trip = <&cpu7_top_fan2>; cooling-device = <&pwm_fan 6 7>; };
-+			};
-+		};
-+		gpuss-0-thermal {
-+			polling-delay = <200>;
-+			trips {
-+				gpuss0_fan0: trip-point3 { temperature = <70000>; hysteresis = <3000>; type = "active"; };
-+				gpuss0_fan1: trip-point4 { temperature = <75000>; hysteresis = <3000>; type = "active"; };
-+				gpuss0_fan2: trip-point5 { temperature = <80000>; hysteresis = <3000>; type = "active"; };
-+			};
-+
-+			cooling-maps {
-+				map1 { trip = <&gpuss0_fan0>; cooling-device = <&pwm_fan 4 5>; };
-+				map2 { trip = <&gpuss0_fan1>; cooling-device = <&pwm_fan 5 6>; };
-+				map3 { trip = <&gpuss0_fan2>; cooling-device = <&pwm_fan 6 7>; };
-+			};
-+		};
-+		gpuss-1-thermal {
-+			polling-delay = <200>;
-+			trips {
-+				gpuss1_fan0: trip-point3 { temperature = <70000>; hysteresis = <3000>; type = "active"; };
-+				gpuss1_fan1: trip-point4 { temperature = <75000>; hysteresis = <3000>; type = "active"; };
-+				gpuss1_fan2: trip-point5 { temperature = <80000>; hysteresis = <3000>; type = "active"; };
-+			};
-+
-+			cooling-maps {
-+				map1 { trip = <&gpuss1_fan0>; cooling-device = <&pwm_fan 4 5>; };
-+				map2 { trip = <&gpuss1_fan1>; cooling-device = <&pwm_fan 5 6>; };
-+				map3 { trip = <&gpuss1_fan2>; cooling-device = <&pwm_fan 6 7>; };
-+			};
-+		};
-+		gpuss-2-thermal {
-+			polling-delay = <200>;
-+			trips {
-+				gpuss2_fan0: trip-point3 { temperature = <70000>; hysteresis = <3000>; type = "active"; };
-+				gpuss2_fan1: trip-point4 { temperature = <75000>; hysteresis = <3000>; type = "active"; };
-+				gpuss2_fan2: trip-point5 { temperature = <80000>; hysteresis = <3000>; type = "active"; };
-+			};
-+
-+			cooling-maps {
-+				map1 { trip = <&gpuss2_fan0>; cooling-device = <&pwm_fan 4 5>; };
-+				map2 { trip = <&gpuss2_fan1>; cooling-device = <&pwm_fan 5 6>; };
-+				map3 { trip = <&gpuss2_fan2>; cooling-device = <&pwm_fan 6 7>; };
-+			};
-+		};
-+		gpuss-3-thermal {
-+			polling-delay = <200>;
-+			trips {
-+				gpuss3_fan0: trip-point3 { temperature = <70000>; hysteresis = <3000>; type = "active"; };
-+				gpuss3_fan1: trip-point4 { temperature = <75000>; hysteresis = <3000>; type = "active"; };
-+				gpuss3_fan2: trip-point5 { temperature = <80000>; hysteresis = <3000>; type = "active"; };
-+			};
-+
-+			cooling-maps {
-+				map1 { trip = <&gpuss3_fan0>; cooling-device = <&pwm_fan 4 5>; };
-+				map2 { trip = <&gpuss3_fan1>; cooling-device = <&pwm_fan 5 6>; };
-+				map3 { trip = <&gpuss3_fan2>; cooling-device = <&pwm_fan 6 7>; };
-+			};
-+		};
-+		gpuss-4-thermal {
-+			polling-delay = <200>;
-+			trips {
-+				gpuss4_fan0: trip-point3 { temperature = <70000>; hysteresis = <3000>; type = "active"; };
-+				gpuss4_fan1: trip-point4 { temperature = <75000>; hysteresis = <3000>; type = "active"; };
-+				gpuss4_fan2: trip-point5 { temperature = <80000>; hysteresis = <3000>; type = "active"; };
-+			};
-+
-+			cooling-maps {
-+				map1 { trip = <&gpuss4_fan0>; cooling-device = <&pwm_fan 4 5>; };
-+				map2 { trip = <&gpuss4_fan1>; cooling-device = <&pwm_fan 5 6>; };
-+				map3 { trip = <&gpuss4_fan2>; cooling-device = <&pwm_fan 6 7>; };
-+			};
-+		};
-+		gpuss-5-thermal {
-+			polling-delay = <200>;
-+			trips {
-+				gpuss5_fan0: trip-point3 { temperature = <70000>; hysteresis = <3000>; type = "active"; };
-+				gpuss5_fan1: trip-point4 { temperature = <75000>; hysteresis = <3000>; type = "active"; };
-+				gpuss5_fan2: trip-point5 { temperature = <80000>; hysteresis = <3000>; type = "active"; };
-+			};
-+
-+			cooling-maps {
-+				map1 { trip = <&gpuss5_fan0>; cooling-device = <&pwm_fan 4 5>; };
-+				map2 { trip = <&gpuss5_fan1>; cooling-device = <&pwm_fan 5 6>; };
-+				map3 { trip = <&gpuss5_fan2>; cooling-device = <&pwm_fan 6 7>; };
-+			};
-+		};
-+		gpuss-6-thermal {
-+			polling-delay = <200>;
-+			trips {
-+				gpuss6_fan0: trip-point3 { temperature = <70000>; hysteresis = <3000>; type = "active"; };
-+				gpuss6_fan1: trip-point4 { temperature = <75000>; hysteresis = <3000>; type = "active"; };
-+				gpuss6_fan2: trip-point5 { temperature = <80000>; hysteresis = <3000>; type = "active"; };
-+			};
-+
-+			cooling-maps {
-+				map1 { trip = <&gpuss6_fan0>; cooling-device = <&pwm_fan 4 5>; };
-+				map2 { trip = <&gpuss6_fan1>; cooling-device = <&pwm_fan 5 6>; };
-+				map3 { trip = <&gpuss6_fan2>; cooling-device = <&pwm_fan 6 7>; };
-+			};
-+		};
-+		gpuss-7-thermal {
-+			polling-delay = <200>;
-+			trips {
-+				gpuss7_fan0: trip-point3 { temperature = <70000>; hysteresis = <3000>; type = "active"; };
-+				gpuss7_fan1: trip-point4 { temperature = <75000>; hysteresis = <3000>; type = "active"; };
-+				gpuss7_fan2: trip-point5 { temperature = <80000>; hysteresis = <3000>; type = "active"; };
-+			};
-+
-+			cooling-maps {
-+				map1 { trip = <&gpuss7_fan0>; cooling-device = <&pwm_fan 4 5>; };
-+				map2 { trip = <&gpuss7_fan1>; cooling-device = <&pwm_fan 5 6>; };
-+				map3 { trip = <&gpuss7_fan2>; cooling-device = <&pwm_fan 6 7>; };
-+			};
 +		};
 +	};
 +
@@ -605,12 +388,12 @@ index 000000000000..0954c1854a05
 +		wlan-enable-gpios = <&tlmm 80 GPIO_ACTIVE_HIGH>;
 +        bt-enable-gpios = <&tlmm 81 GPIO_ACTIVE_HIGH>;
 +
-+		vdd-supply = <&vreg_s5g_0p8>;
++		vdd-supply = <&vreg_s5g_0p85>;
 +		vddio-supply = <&vreg_l15b_1p8>;
-+		vddaon-supply = <&vreg_s2g_0p8>;
++		vddaon-supply = <&vreg_s2g_0p85>;
 +		vdddig-supply = <&vreg_s4e_0p95>;
-+		vddrfa1p2-supply = <&vreg_s4g_1p3>;
-+		vddrfa1p8-supply = <&vreg_s6g_1p8>;
++		vddrfa1p2-supply = <&vreg_s4g_1p25>;
++		vddrfa1p8-supply = <&vreg_s6g_1p86>;
 +
 +		regulators {
 +			vreg_pmu_rfa_cmn: ldo0 {
@@ -663,15 +446,15 @@ index 000000000000..0954c1854a05
 +
 +		vdd-bob1-supply = <&vph_pwr>;
 +		vdd-bob2-supply = <&vph_pwr>;
-+		vdd-l1-l4-l10-supply = <&vreg_s6g_1p8>;
++		vdd-l1-l4-l10-supply = <&vreg_s6g_1p86>;
 +		vdd-l2-l13-l14-supply = <&vreg_bob1>;
-+		vdd-l3-supply = <&vreg_s4g_1p3>;
++		vdd-l3-supply = <&vreg_s4g_1p25>;
 +		vdd-l5-l16-supply = <&vreg_bob1>;
 +		vdd-l6-l7-supply = <&vreg_bob1>;
 +		vdd-l8-l9-supply = <&vreg_bob1>;
-+		vdd-l11-supply = <&vreg_s4g_1p3>;
-+		vdd-l12-supply = <&vreg_s6g_1p8>;
-+		vdd-l15-supply = <&vreg_s6g_1p8>;
++		vdd-l11-supply = <&vreg_s4g_1p25>;
++		vdd-l12-supply = <&vreg_s6g_1p86>;
++		vdd-l15-supply = <&vreg_s6g_1p86>;
 +		vdd-l17-supply = <&vreg_bob2>;
 +
 +		vreg_bob1: bob1 {
@@ -791,7 +574,7 @@ index 000000000000..0954c1854a05
 +		compatible = "qcom,pm8550vs-rpmh-regulators";
 +		qcom,pmic-id = "c";
 +
-+		vdd-l1-supply = <&vreg_s4g_1p3>;
++		vdd-l1-supply = <&vreg_s4g_1p25>;
 +		vdd-l2-supply = <&vreg_s4e_0p95>;
 +		vdd-l3-supply = <&vreg_s4e_0p95>;
 +
@@ -825,7 +608,7 @@ index 000000000000..0954c1854a05
 +
 +		vdd-l1-supply = <&vreg_s4e_0p95>;
 +		vdd-l2-supply = <&vreg_s4e_0p95>;
-+		vdd-l3-supply = <&vreg_s4g_1p3>;
++		vdd-l3-supply = <&vreg_s4g_1p25>;
 +		vdd-s4-supply = <&vph_pwr>;
 +		vdd-s5-supply = <&vph_pwr>;
 +
@@ -906,10 +689,9 @@ index 000000000000..0954c1854a05
 +	regulators-5 {
 +		compatible = "qcom,pm8550vs-rpmh-regulators";
 +		qcom,pmic-id = "g";
-+
-+		vdd-l1-supply = <&vreg_s4g_1p3>;
-+		vdd-l2-supply = <&vreg_s4g_1p3>;
-+		vdd-l3-supply = <&vreg_s4g_1p3>;
++		vdd-l1-supply = <&vreg_s4g_1p25>;
++		vdd-l2-supply = <&vreg_s4g_1p25>;
++		vdd-l3-supply = <&vreg_s4g_1p25>;
 +		vdd-s1-supply = <&vph_pwr>;
 +		vdd-s2-supply = <&vph_pwr>;
 +		vdd-s3-supply = <&vph_pwr>;
@@ -917,43 +699,43 @@ index 000000000000..0954c1854a05
 +		vdd-s5-supply = <&vph_pwr>;
 +		vdd-s6-supply = <&vph_pwr>;
 +
-+		vreg_s1g_1p2: smps1 {
-+			regulator-name = "vreg_s1g_1p2";
++		vreg_s1g_1p25: smps1 {
++			regulator-name = "vreg_s1g_1p25";
 +			regulator-min-microvolt = <1200000>;
 +			regulator-max-microvolt = <1300000>;
 +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
 +		};
 +
-+		vreg_s2g_0p8: smps2 {
-+			regulator-name = "vreg_s2g_0p8";
-+			regulator-min-microvolt = <800000>;
-+			regulator-max-microvolt = <1000000>;
++		vreg_s2g_0p85: smps2 {
++			regulator-name = "vreg_s2g_0p85";
++			regulator-min-microvolt = <500000>;
++			regulator-max-microvolt = <1036000>;
 +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
 +		};
 +
-+		vreg_s3g_0p7: smps3 {
-+			regulator-name = "vreg_s3g_0p7";
++		vreg_s3g_0p8: smps3 {
++			regulator-name = "vreg_s3g_0p8";
 +			regulator-min-microvolt = <300000>;
 +			regulator-max-microvolt = <1004000>;
 +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
 +		};
 +
-+		vreg_s4g_1p3: smps4 {
-+			regulator-name = "vreg_s4g_1p3";
-+			regulator-min-microvolt = <1200000>;
-+			regulator-max-microvolt = <1352000>;
++		vreg_s4g_1p25: smps4 {
++			regulator-name = "vreg_s4g_1p25";
++			regulator-min-microvolt = <1256000>;
++			regulator-max-microvolt = <1408000>;
 +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
 +		};
 +
-+		vreg_s5g_0p8: smps5 {
-+			regulator-name = "vreg_s5g_0p8";
++		vreg_s5g_0p85: smps5 {
++			regulator-name = "vreg_s5g_0p85";
 +			regulator-min-microvolt = <500000>;
 +			regulator-max-microvolt = <1004000>;
 +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
 +		};
 +
-+		vreg_s6g_1p8: smps6 {
-+			regulator-name = "vreg_s6g_1p8";
++		vreg_s6g_1p86: smps6 {
++			regulator-name = "vreg_s6g_1p86";
 +			regulator-min-microvolt = <1800000>;
 +			regulator-max-microvolt = <2000000>;
 +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
@@ -961,14 +743,14 @@ index 000000000000..0954c1854a05
 +
 +		vreg_l1g_1p2: ldo1 {
 +			regulator-name = "vreg_l1g_1p2";
-+			regulator-min-microvolt = <1200000>;
-+			regulator-max-microvolt = <1200000>;
++			regulator-min-microvolt = <1128000>;
++			regulator-max-microvolt = <1272000>;
 +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
 +		};
 +
 +		vreg_l2g_1p2: ldo2 {
 +			regulator-name = "vreg_l2g_1p2";
-+			regulator-min-microvolt = <1200000>;
++			regulator-min-microvolt = <1100000>;
 +			regulator-max-microvolt = <1200000>;
 +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
 +		};
@@ -977,126 +759,6 @@ index 000000000000..0954c1854a05
 +			regulator-name = "vreg_l3g_1p2";
 +			regulator-min-microvolt = <1200000>;
 +			regulator-max-microvolt = <1200000>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-+		};
-+	};
-+
-+	regulators-6 {
-+		compatible = "qcom,pm8010-rpmh-regulators";
-+		qcom,pmic-id = "m";
-+
-+		vdd-l1-l2-supply = <&vreg_s4g_1p3>;
-+		vdd-l3-l4-supply = <&vreg_bob2>;
-+		vdd-l5-supply = <&vreg_s6g_1p8>;
-+		vdd-l6-supply = <&vreg_s6g_1p8>;
-+		vdd-l7-supply = <&vreg_bob1>;
-+
-+		vreg_l1m_1p056: ldo1 {
-+			regulator-name = "vreg_l1m_1p056";
-+			regulator-min-microvolt = <1056000>;
-+			regulator-max-microvolt = <1056000>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-+		};
-+
-+		vreg_l2m_1p056: ldo2 {
-+			regulator-name = "vreg_l2m_1p056";
-+			regulator-min-microvolt = <1056000>;
-+			regulator-max-microvolt = <1056000>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-+		};
-+
-+		vreg_l3m_2p8: ldo3 {
-+			regulator-name = "vreg_l3m_2p8";
-+			regulator-min-microvolt = <2800000>;
-+			regulator-max-microvolt = <2800000>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-+		};
-+
-+		vreg_l4m_2p8: ldo4 {
-+			regulator-name = "vreg_l4m_2p8";
-+			regulator-min-microvolt = <2800000>;
-+			regulator-max-microvolt = <2800000>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-+		};
-+
-+		vreg_l5m_1p8: ldo5 {
-+			regulator-name = "vreg_l5m_1p8";
-+			regulator-min-microvolt = <1800000>;
-+			regulator-max-microvolt = <1800000>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-+		};
-+
-+		vreg_l6m_1p8: ldo6 {
-+			regulator-name = "vreg_l6m_1p8";
-+			regulator-min-microvolt = <1800000>;
-+			regulator-max-microvolt = <1800000>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-+		};
-+
-+		vreg_l7m_2p9: ldo7 {
-+			regulator-name = "vreg_l7m_2p9";
-+			regulator-min-microvolt = <2800000>;
-+			regulator-max-microvolt = <2904000>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-+		};
-+	};
-+
-+	regulators-7 {
-+		compatible = "qcom,pm8010-rpmh-regulators";
-+		qcom,pmic-id = "n";
-+
-+		vdd-l1-l2-supply = <&vreg_s4g_1p3>;
-+		vdd-l3-l4-supply = <&vreg_bob2>;
-+		vdd-l5-supply = <&vreg_s6g_1p8>;
-+		vdd-l6-supply = <&vreg_bob1>;
-+		vdd-l7-supply = <&vreg_bob1>;
-+
-+		vreg_l1n_1p1: ldo1 {
-+			regulator-name = "vreg_l1n_1p1";
-+			regulator-min-microvolt = <1104000>;
-+			regulator-max-microvolt = <1200000>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-+		};
-+
-+		vreg_l2n_1p1: ldo2 {
-+			regulator-name = "vreg_l2n_1p1";
-+			regulator-min-microvolt = <1104000>;
-+			regulator-max-microvolt = <1200000>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-+		};
-+
-+		vreg_l3n_2p8: ldo3 {
-+			regulator-name = "vreg_l3n_2p8";
-+			regulator-min-microvolt = <2800000>;
-+			regulator-max-microvolt = <3000000>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-+		};
-+
-+		vreg_l4n_2p8: ldo4 {
-+			regulator-name = "vreg_l4n_2p8";
-+			regulator-min-microvolt = <2800000>;
-+			regulator-max-microvolt = <3300000>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-+		};
-+
-+		vreg_l5n_1p8: ldo5 {
-+			regulator-name = "vreg_l5n_1p8";
-+			regulator-min-microvolt = <1800000>;
-+			regulator-max-microvolt = <1800000>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-+		};
-+
-+		vreg_l6n_3p3: ldo6 {
-+			regulator-name = "vreg_l6n_3p3";
-+			regulator-min-microvolt = <3200000>;
-+			regulator-max-microvolt = <3200000>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-+		};
-+
-+		vreg_l7n_2p96: ldo7 {
-+			regulator-name = "vreg_l7n_2p96";
-+			regulator-min-microvolt = <2800000>;
-+			regulator-max-microvolt = <2960000>;
 +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
 +		};
 +	};
@@ -1112,10 +774,6 @@ index 000000000000..0954c1854a05
 +
 +&gpu {
 +	status = "okay";
-+
-+	zap-shader {
-+		firmware-name = "qcom/sm8550/ayn/a740_zap.mbn";
-+	};
 +};
 +
 +&i2c0 {
@@ -1145,25 +803,27 @@ index 000000000000..0954c1854a05
 +		compatible = "awinic,aw88166";
 +		reg = <0x34>;
 +		#sound-dai-cells = <1>;
-+		reset-gpios = <&tlmm 103 GPIO_ACTIVE_LOW>;
++		reset-gpios = <&tlmm 103 GPIO_ACTIVE_HIGH>;
 +		awinic,audio-channel = <0>;
 +		awinic,sync-flag;
-+		sound-name-prefix = "SPK_L";
 +	};
 +
 +	spk_amp_r: spk_amp_r@35 {
 +		compatible = "awinic,aw88166";
 +		reg = <0x35>;
 +		#sound-dai-cells = <1>;
-+		reset-gpios = <&tlmm 100 GPIO_ACTIVE_LOW>;
++		reset-gpios = <&tlmm 100 GPIO_ACTIVE_HIGH>;
 +		awinic,audio-channel = <1>;
 +		awinic,sync-flag;
-+		sound-name-prefix = "SPK_R";
 +	};
 +};
 +
-+&iris {
-+	status = "okay";
++&lpass_vamacro {
++	qcom,dmic-sample-rate = <4800000>;
++};
++
++&lpass_wsamacro {
++	status = "disabled";
 +};
 +
 +&lpass_tlmm {
@@ -1202,14 +862,6 @@ index 000000000000..0954c1854a05
 +	};
 +};
 +
-+&lpass_vamacro {
-+	qcom,dmic-sample-rate = <4800000>;
-+};
-+
-+&lpass_wsamacro {
-+	status = "disabled";
-+};
-+
 +&mdss {
 +	status = "okay";
 +};
@@ -1219,6 +871,11 @@ index 000000000000..0954c1854a05
 +	sound-name-prefix = "Display Port0";
 +};
 +
++&mdss_dp0_out {
++	data-lanes = <0 1 2 3>;
++	link-frequencies = /bits/ 64 <1620000000 2700000000 5400000000 8100000000>;
++};
++
 +&mdss_dsi1 {
 +	vdda-supply = <&vreg_l3e_1p2>;
 +	status = "okay";
@@ -1226,8 +883,12 @@ index 000000000000..0954c1854a05
 +	display_panel: panel@0 {
 +		reg = <0>;
 +
++		pinctrl-0 = <&sde_dsi_active>, <&sde_te_active>;
++		pinctrl-1 = <&sde_dsi_suspend>, <&sde_te_suspend>;
++		pinctrl-names = "default", "sleep";
++
 +		port {
-+			panel1_in: endpoint {
++			panel0_in: endpoint {
 +				remote-endpoint = <&mdss_dsi1_out>;
 +			};
 +		};
@@ -1235,7 +896,7 @@ index 000000000000..0954c1854a05
 +};
 +
 +&mdss_dsi1_out {
-+	remote-endpoint = <&panel1_in>;
++	remote-endpoint = <&panel0_in>;
 +	data-lanes = <0 1 2 3>;
 +};
 +
@@ -1245,8 +906,9 @@ index 000000000000..0954c1854a05
 +};
 +
 +&pcie0 {
-+	wake-gpios = <&tlmm 96 GPIO_ACTIVE_HIGH>;
 +	perst-gpios = <&tlmm 94 GPIO_ACTIVE_LOW>;
++	wake-gpios = <&tlmm 96 GPIO_ACTIVE_HIGH>;
++	max-link-speed = <2>;
 +
 +	pinctrl-0 = <&pcie0_default_state>;
 +	pinctrl-names = "default";
@@ -1314,21 +976,16 @@ index 000000000000..0954c1854a05
 +		color = <LED_COLOR_ID_RGB>;
 +		label = "power-led";
 +
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+
-+		red@1 {
-+			reg = <1>;
++		red {
++			reg = <0x01>;
 +			color = <LED_COLOR_ID_RED>;
 +		};
-+
-+		green@2 {
-+			reg = <2>;
++		green {
++			reg = <0x02>;
 +			color = <LED_COLOR_ID_GREEN>;
 +		};
-+
-+		blue@3 {
-+			reg = <3>;
++		blue {
++			reg = <0x03>;
 +			color = <LED_COLOR_ID_BLUE>;
 +		};
 +	};
@@ -1351,28 +1008,6 @@ index 000000000000..0954c1854a05
 +		bias-disable;
 +		power-source = <0>;
 +	};
-+
-+	pwm_backlight_default: pwm-backlight-default-state {
-+		pins = "gpio5";
-+		function = "func3";
-+		input-disable;
-+		output-low;
-+		output-enable;
-+		bias-disable;
-+		power-source = <0>;
-+		qcom,drive-strength = <2>;
-+	};
-+};
-+
-+&pmk8550_rtc {
-+	nvmem-cells = <&rtc_offset>;
-+	nvmem-cell-names = "offset";
-+};
-+
-+&pmk8550_sdam_2 {
-+	rtc_offset: rtc-offset@bc {
-+		reg = <0xbc 0x4>;
-+	};
 +};
 +
 +&pon_pwrkey {
@@ -1393,12 +1028,6 @@ index 000000000000..0954c1854a05
 +	status = "okay";
 +};
 +
-+&remoteproc_cdsp {
-+	firmware-name = "qcom/sm8550/ayn/cdsp.mbn",
-+			"qcom/sm8550/ayn/cdsp_dtb.mbn";
-+	status = "okay";
-+};
-+
 +&sdhc_2 {
 +	cd-gpios = <&pm8550_gpios 12 GPIO_ACTIVE_LOW>;
 +	pinctrl-names = "default", "sleep";
@@ -1410,7 +1039,9 @@ index 000000000000..0954c1854a05
 +	no-sdio;
 +	no-mmc;
 +
++	qcom,use-level-shifter;
 +	qcom,dll-config = <0x0007442c>;
++	/delete-property/ sdhci-caps-mask;
 +
 +	status = "okay";
 +};
@@ -1440,62 +1071,6 @@ index 000000000000..0954c1854a05
 +&tlmm {
 +	gpio-reserved-ranges = <32 8>;
 +
-+	dsi_p_rst_active: dsi-p-rst-active-state {
-+		pins = "gpio133";
-+		function = "gpio";
-+		drive-strength = <8>;
-+		bias-disable;
-+	};
-+
-+	dsi_p_rst_suspend: dsi-p-rst-suspend-state {
-+		pins = "gpio133";
-+		function = "gpio";
-+		drive-strength = <2>;
-+		bias-pull-down;
-+	};
-+
-+	dsi_p_te_active: dsi-p-te-active-state {
-+		pins = "gpio86";
-+		function = "mdp_vsync";
-+		drive-strength = <2>;
-+		bias-pull-down;
-+	};
-+
-+	dsi_p_te_suspend: dsi-s-te-suspend-state {
-+		pins = "gpio86";
-+		function = "mdp_vsync";
-+		drive-strength = <2>;
-+		bias-pull-down;
-+	};
-+
-+	dsi_s_rst_active: dsi-s-rst-active-state {
-+		pins = "gpio137";
-+		function = "gpio";
-+		drive-strength = <8>;
-+		bias-disable;
-+	};
-+
-+	dsi_s_rst_suspend: dsi-s-rst-suspend-state {
-+		pins = "gpio137";
-+		function = "gpio";
-+		drive-strength = <2>;
-+		bias-pull-down;
-+	};
-+
-+	dsi_s_te_active: dsi-s-te-active-state {
-+		pins = "gpio87";
-+		function = "mdp_vsync";
-+		drive-strength = <2>;
-+		bias-pull-down;
-+	};
-+
-+	dsi_s_te_suspend: dsi-s-te-suspend-state {
-+		pins = "gpio87";
-+		function = "mdp_vsync";
-+		drive-strength = <2>;
-+		bias-pull-down;
-+	};
-+
 +	bt_default: bt-default-state {
 +		bt-en-pins {
 +			pins = "gpio81";
@@ -1519,70 +1094,63 @@ index 000000000000..0954c1854a05
 +		output-low;
 +	};
 +
-+	fan_int: fan-int-state {
-+		pins = "gpio13";
-+		function = "gpio";
-+		drive-strength = <2>;
-+		bias-disable;
-+	};
-+
 +	mcu_en_active: mcu-en-active-state {
 +		pins = "gpio12";
 +		function = "gpio";
 +		bias-pull-down;
 +	};
 +
-+	ts_p_rst_default: ts-p-rst-default-state {
++	sde_dsi_active: sde-dsi-active-state {
++		pins = "gpio133";
++		function = "gpio";
++		drive-strength = <8>;
++		bias-disable;
++	};
++
++	sde_dsi_suspend: sde-dsi-suspend-state {
++		pins = "gpio133";
++		function = "gpio";
++		drive-strength = <2>;
++		bias-pull-down;
++	};
++
++	sde_te_active: sde-te-active-state {
++		pins = "gpio86";
++		function = "mdp_vsync";
++		drive-strength = <2>;
++		bias-pull-down;
++	};
++
++	sde_te_suspend: sde-te-suspend-state {
++		pins = "gpio86";
++		function = "mdp_vsync";
++		drive-strength = <2>;
++		bias-pull-down;
++	};
++
++	ts_rst_default: ts-rst-default-state {
 +		pins = "gpio24";
 +		function = "gpio";
 +		bias-pull-up;
 +		drive-strength = <8>;
 +	};
 +
-+	ts_p_rst_sleep: ts-p-rst-sleep-state {
++	ts_rst_sleep: ts-rst-sleep-state {
 +		pins = "gpio24";
 +		function = "gpio";
 +		bias-pull-down;
 +		drive-strength = <2>;
 +	};
 +
-+	ts_p_int_default: ts-p-int-default-state {
++	ts_int_default: ts-int-default-state {
 +		pins = "gpio25";
 +		function = "gpio";
 +		bias-pull-up;
 +		drive-strength = <8>;
 +	};
 +
-+	ts_p_int_sleep: ts-p-int-sleep-state {
++	ts_int_sleep: ts-int-sleep-state {
 +		pins = "gpio25";
-+		function = "gpio";
-+		bias-pull-down;
-+		drive-strength = <2>;
-+	};
-+
-+	ts_s_rst_default: ts-s-rst-default-state {
-+		pins = "gpio14";
-+		function = "gpio";
-+		bias-pull-up;
-+		drive-strength = <8>;
-+	};
-+
-+	ts_s_rst_sleep: ts-s-rst-sleep-state {
-+		pins = "gpio14";
-+		function = "gpio";
-+		bias-pull-down;
-+		drive-strength = <2>;
-+	};
-+
-+	ts_s_int_default: ts-s-int-default-state {
-+		pins = "gpio15";
-+		function = "gpio";
-+		bias-pull-up;
-+		drive-strength = <8>;
-+	};
-+
-+	ts_s_int_sleep: ts-s-int-sleep-state {
-+		pins = "gpio15";
 +		function = "gpio";
 +		bias-pull-down;
 +		drive-strength = <2>;
@@ -1655,7 +1223,6 @@ index 000000000000..0954c1854a05
 +		gamepad-pid = <0x3001>;
 +		gamepad-rev = <0x0001>;
 +
-+		vdd-supply = <&vreg_bob2>;
 +		enable-gpios = <&tlmm 12 GPIO_ACTIVE_HIGH>;
 +		pinctrl-0 = <&mcu_en_active>;
 +		pinctrl-names = "default";
@@ -1670,14 +1237,14 @@ index 000000000000..0954c1854a05
 +	vccq-max-microamp = <1200000>;
 +	vdd-hba-supply = <&vreg_l3g_1p2>;
 +
-+	status = "disabled";
++	status = "okay";
 +};
 +
 +&ufs_mem_phy {
 +	vdda-phy-supply = <&vreg_l1d_0p88>;
 +	vdda-pll-supply = <&vreg_l3e_1p2>;
 +
-+	status = "disabled";
++	status = "okay";
 +};
 +
 +&usb_1 {
@@ -1712,6 +1279,255 @@ index 000000000000..0954c1854a05
 +
 +&xo_board {
 +	clock-frequency = <76800000>;
++};
+diff --git a/arch/arm64/boot/dts/qcom/qcs8550-ayn-odin2portal.dts b/arch/arm64/boot/dts/qcom/qcs8550-ayn-odin2portal.dts
+new file mode 100644
+index 000000000000..f04c275966e4
+--- /dev/null
++++ b/arch/arm64/boot/dts/qcom/qcs8550-ayn-odin2portal.dts
+@@ -0,0 +1,243 @@
++// SPDX-License-Identifier: BSD-3-Clause
++/*
++ * Copyright (c) 2025, Teguh Sobirin.
++ */
++
++/dts-v1/;
++
++#include "qcs8550-ayn-common.dtsi"
++
++/ {
++	model = "AYN Odin 2 Portal";
++	compatible = "ayn,odin2portal", "qcom,qcs8550", "qcom,sm8550";
++	qcom,msm-id = <603 0x20000>;
++	qcom,board-id = <0x1001f 0>;
++
++	vdd_bl_5v0: vdd-bl-5v0-regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "vdd_bl_5v0";
++
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++
++		gpio = <&tlmm 52 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++
++	vdd_disp_2v8: vdd-disp-2v8-regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "vdd_disp_2v8";
++
++		regulator-min-microvolt = <2800000>;
++		regulator-max-microvolt = <2800000>;
++
++		gpio = <&tlmm 142 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++};
++
++&display_panel {
++	compatible = "chipone,icna3512";
++
++	blvdd-supply = <&vdd_bl_5v0>;
++	iovdd-supply = <&vreg_l12b_1p8>;
++	vdd-supply = <&vdd_disp_2v8>;
++
++	reset-gpios = <&tlmm 133 GPIO_ACTIVE_LOW>;
++
++	rotation = <270>;
++};
++
++&gpu {
++	zap-shader {
++		firmware-name = "qcom/sm8550/ayn/odin2portal/a740_zap.mbn";
++	};
++};
++
++&i2c0 {
++	htr3212l: led-controller@3c {
++		compatible = "heroic,htr3212";
++		reg = <0x3c>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++		sdb-gpios = <&tlmm 55 GPIO_ACTIVE_HIGH>;
++		vdd-supply = <&vdd_mcu_3v3>;
++
++		ledl_b1: led@1 {
++			reg = <1>;
++			label = "l:r1";
++			color = <LED_COLOR_ID_RED>;
++		};
++		ledl_g1: led@2 {
++			reg = <2>;
++			label = "l:g1";
++			color = <LED_COLOR_ID_GREEN>;
++		};
++		ledl_r1: led@3 {
++			reg = <3>;
++			label = "l:b1";
++			color = <LED_COLOR_ID_BLUE>;
++		};
++		ledl_b2: led@4 {
++			reg = <4>;
++			label = "l:r2";
++			color = <LED_COLOR_ID_RED>;
++		};
++		ledl_g2: led@5 {
++			reg = <5>;
++			label = "l:g2";
++			color = <LED_COLOR_ID_GREEN>;
++		};
++		ledl_r2: led@6 {
++			reg = <6>;
++			label = "l:b2";
++			color = <LED_COLOR_ID_BLUE>;
++		};
++		ledl_b3: led@7 {
++			reg = <7>;
++			label = "l:r3";
++			color = <LED_COLOR_ID_RED>;
++		};
++		ledl_g3: led@8 {
++			reg = <8>;
++			label = "l:g3";
++			color = <LED_COLOR_ID_GREEN>;
++		};
++		ledl_r3: led@9 {
++			reg = <9>;
++			label = "l:b3";
++			color = <LED_COLOR_ID_BLUE>;
++		};
++		ledl_b4: led@10 {
++			reg = <10>;
++			label = "l:r4";
++			color = <LED_COLOR_ID_RED>;
++		};
++		ledl_g4: led@11 {
++			reg = <11>;
++			label = "l:g4";
++			color = <LED_COLOR_ID_GREEN>;
++		};
++		ledl_r4: led@12 {
++			reg = <12>;
++			label = "l:b4";
++			color = <LED_COLOR_ID_BLUE>;
++		};
++	};
++};
++
++&i2c4 {
++	touchscreen: touchscreen@38 {
++		compatible = "focaltech,ft5426";
++		reg = <0x38>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		interrupt-parent = <&tlmm>;
++		interrupts = <25 IRQ_TYPE_EDGE_FALLING>;
++
++		reset-gpios = <&tlmm 24 GPIO_ACTIVE_LOW>;
++
++		vcc-supply = <&vreg_l14b_3p2>;
++		iovcc-supply = <&vreg_l12b_1p8>;
++
++		pinctrl-0 = <&ts_int_default &ts_rst_default>;
++		pinctrl-1 = <&ts_int_sleep &ts_rst_sleep>;
++		pinctrl-names = "default", "sleep";
++
++		touchscreen-size-x = <1080>;
++		touchscreen-size-y = <1920>;
++	};
++};
++
++&i2c12 {
++	htr3212r: led-controller@3c {
++		compatible = "heroic,htr3212";
++		reg = <0x3c>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++		sdb-gpios = <&tlmm 56 GPIO_ACTIVE_HIGH>;
++		vdd-supply = <&vdd_mcu_3v3>;
++
++		ledr_b1: led@1 {
++			reg = <1>;
++			label = "r:r1";
++			color = <LED_COLOR_ID_RED>;
++		};
++		ledr_g1: led@2 {
++			reg = <2>;
++			label = "r:g1";
++			color = <LED_COLOR_ID_GREEN>;
++		};
++		ledr_r1: led@3 {
++			reg = <3>;
++			label = "r:b1";
++			color = <LED_COLOR_ID_BLUE>;
++		};
++		ledr_b2: led@4 {
++			reg = <4>;
++			label = "r:r2";
++			color = <LED_COLOR_ID_RED>;
++		};
++		ledr_g2: led@5 {
++			reg = <5>;
++			label = "r:g2";
++			color = <LED_COLOR_ID_GREEN>;
++		};
++		ledr_r2: led@6 {
++			reg = <6>;
++			label = "r:b2";
++ 			color = <LED_COLOR_ID_BLUE>;
++		};
++		ledr_b3: led@7 {
++			reg = <7>;
++			label = "r:r3";
++			color = <LED_COLOR_ID_RED>;
++		};
++		ledr_g3: led@8 {
++			reg = <8>;
++			label = "r:g3";
++			color = <LED_COLOR_ID_GREEN>;
++		};
++		ledr_r3: led@9 {
++			reg = <9>;
++			label = "r:b3";
++			color = <LED_COLOR_ID_BLUE>;
++		};
++		ledr_b4: led@10 {
++			reg = <10>;
++			label = "r:r4";
++			color = <LED_COLOR_ID_RED>;
++		};
++		ledr_g4: led@11 {
++			reg = <11>;
++			label = "r:g4";
++			color = <LED_COLOR_ID_GREEN>;
++		};
++		ledr_r4: led@12 {
++			reg = <12>;
++			label = "r:b4";
++			color = <LED_COLOR_ID_BLUE>;
++		};
++	};
++};
++
++&remoteproc_adsp {
++	firmware-name = "qcom/sm8550/ayn/odin2portal/adsp.mbn",
++			"qcom/sm8550/ayn/odin2portal/adsp_dtb.mbn";
++	status = "okay";
++};
++
++&remoteproc_cdsp {
++	firmware-name = "qcom/sm8550/ayn/odin2portal/cdsp.mbn",
++			"qcom/sm8550/ayn/odin2portal/cdsp_dtb.mbn";
++	status = "okay";
++};
++
++&spk_amp_l {
++	firmware-name = "qcom/sm8550/ayn/odin2portal/aw883xx_acf.bin";
++};
++
++&spk_amp_r {
++	firmware-name = "qcom/sm8550/ayn/odin2portal/aw883xx_acf.bin";
 +};
 -- 
 2.34.1
